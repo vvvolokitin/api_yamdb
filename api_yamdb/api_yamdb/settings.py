@@ -31,6 +31,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'reviews.apps.ReviewsConfig',
+    'api.apps.ApiConfig',
 ]
 
 ROOT_URLCONF = 'api_yamdb.urls'
