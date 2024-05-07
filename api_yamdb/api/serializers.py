@@ -1,4 +1,3 @@
-from tabnanny import check
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
@@ -124,7 +123,8 @@ class SimpleUserSerializer(UserCreateSerializer):
 
     def validate(self, attrs):
         """
-        Проверка на имя 'me' и уникальность имени с email
+        Проверка на имя 'me' и уникальность имени с email,
+        при этом проверка не вызывает ошибку если оставить старые имя и email
         """
 
         username = attrs.get('username')
@@ -156,21 +156,27 @@ class AdminUserSerializer(SimpleUserSerializer):
 
     def validate(self, attrs):
         """
-        Проверка на имя 'me' и уникальность имени с email
+        Проверка на имя 'me' и уникальность имени с email,
+        при этом проверка не вызывает ошибку если оставить старые имя и email
         """
 
         username = attrs.get('username')
         email = attrs.get('email')
+        request = self.context.get('request')
+        username_from_url = (
+            request.parser_context.get('kwargs').get('username')
+        )
 
         name_is_not_me(username)
-
         user_by_username = get_user_by_username(username)
         user_by_email = get_user_by_email(email)
-        if user_by_username:
+        user_from_url = get_user_by_username(username_from_url)
+
+        if user_by_username and username_from_url != user_by_username.username:
             raise serializers.ValidationError(
                 'Пользователь с таким именем уже существует'
             )
-        if user_by_email:
+        if user_by_email and email != user_from_url.email:
             raise serializers.ValidationError(
                 'Пользователь с таким email уже существует'
             )
@@ -179,4 +185,6 @@ class AdminUserSerializer(SimpleUserSerializer):
 
     class Meta():
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )

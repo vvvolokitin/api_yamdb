@@ -115,7 +115,7 @@ class UserViewSet(
         """
         user = get_object_or_404(User, username=username)
         if request.method == 'PATCH':
-            serializer = AdminUserSerializer(
+            serializer = self.get_serializer(
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
