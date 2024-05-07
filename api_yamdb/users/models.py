@@ -39,3 +39,12 @@ class MyUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def is_admin(self):
+        return self.role == MyUser.UserRole.ADMIN
+
+    def is_moderator(self):
+        return self.role == MyUser.UserRole.MODERATOR
+
+    def is_user(self):
+        return self.role == MyUser.UserRole.USER
