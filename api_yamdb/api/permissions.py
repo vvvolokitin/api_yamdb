@@ -27,7 +27,7 @@ class CustomObjectPermissions(permissions.BasePermission):
                 obj.author == request.user
                 or request.user.is_moderator()
                 or request.user.is_admin()
-                or request.user.is_stuff
+                or request.user.is_staff
                 or request.user.is_superuser
             )
         return True
@@ -44,8 +44,7 @@ class IsSuperUser(permissions.BasePermission):
             request.user.is_authenticated
             and (
                 request.user.is_admin()
-                or request.user.is_stuff
+                or request.user.is_staff
                 or request.user.is_superuser
             )
         )
-
