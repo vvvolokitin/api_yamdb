@@ -2,7 +2,7 @@ from django.conf import settings
 from django.urls import include, path
 
 from .views import (
-    CategoryViewSet, GenreViewSet, UserCreateViewSet, UserReceiveTokenViewSet
+    CategoryViewSet, GenreViewSet, UserCreateViewSet, UserReceiveTokenViewSet, UserViewSet
 )
 
 if settings.DEBUG:
@@ -22,6 +22,11 @@ router_v1.register(
     'genres',
     GenreViewSet,
     basename='genres'
+)
+router_v1.register(
+    'users',
+    UserViewSet,
+    basename='users'
 )
 
 auth_urls = [

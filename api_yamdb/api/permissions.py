@@ -48,3 +48,4 @@ class IsSuperUser(permissions.BasePermission):
                 or request.user.is_superuser
             )
         )
+
