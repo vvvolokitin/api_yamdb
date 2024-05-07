@@ -1,9 +1,9 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from django.contrib.auth import get_user_model
 
 from reviews.models import Category, Genre
 from core.constants import MAX_USER_NAME_LENGTH, MAX_EMAIL_LENGTH
-
 
 
 User = get_user_model()
@@ -12,14 +12,6 @@ User = get_user_model()
 def name_is_not_me(username):
     if username == 'me':
         raise serializers.ValidationError('Имя не может быть <me>')
-
-
-def get_user_by_username(username):
-    return User.objects.filter(username=username).first()
-
-
-def get_user_by_email(email):
-    return User.objects.filter(email=email).first()
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -50,13 +42,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         max_length=MAX_EMAIL_LENGTH,
         allow_blank=False,
-        required=True
+        required=True,
     )
     username = serializers.RegexField(
         regex=r'^[\w.@+-]+$',
         max_length=MAX_USER_NAME_LENGTH,
         allow_blank=False,
-        required=True
+        required=True,
     )
 
     def validate(self, attrs):
@@ -70,8 +62,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
         email = attrs.get('email')
 
         name_is_not_me(username)
-        user_by_username = get_user_by_username(username)
-        user_by_email = get_user_by_email(email)
+        user_by_username = User.objects.filter(username=username).first()
+        user_by_email = User.objects.filter(email=email).first()
 
         if user_by_username and not user_by_email:
             raise serializers.ValidationError(
@@ -104,84 +96,51 @@ class UserRecieveTokenSerializer(serializers.Serializer):
     )
 
 
-class SimpleUserSerializer(UserCreateSerializer):
+class SimpleUserSerializer(serializers.ModelSerializer):
     """Сериалайзер пользователя для самого пользователя"""
 
+    email = serializers.EmailField(
+        max_length=MAX_EMAIL_LENGTH,
+        allow_blank=False,
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=MAX_USER_NAME_LENGTH,
+        allow_blank=False,
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
     first_name = serializers.RegexField(
         regex=r'^[\w.@+-]+$',
         max_length=MAX_USER_NAME_LENGTH,
-        allow_blank=False,
-        required=True
+        allow_blank=True,
+        required=False,
     )
-
     last_name = serializers.RegexField(
         regex=r'^[\w.@+-]+$',
         max_length=MAX_USER_NAME_LENGTH,
-        allow_blank=False,
-        required=True
+        allow_blank=True,
+        required=False
     )
 
     def validate(self, attrs):
-        """
-        Проверка на имя 'me' и уникальность имени с email,
-        при этом проверка не вызывает ошибку если оставить старые имя и email
-        """
-
+        """Проверка на имя 'me'"""
         username = attrs.get('username')
-        email = attrs.get('email')
-
         name_is_not_me(username)
-        user_by_username = get_user_by_username(username)
-        user_by_email = get_user_by_email(email)
-
-        if user_by_username and username != self.context.get('request').user.username:
-            raise serializers.ValidationError(
-                'Пользователь с таким именем уже существует'
-            )
-        if user_by_email and email != self.context.get('request').user.email:
-            raise serializers.ValidationError(
-                'Пользователь с таким email уже существует'
-            )
-
         return attrs
 
     class Meta():
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
-        read_only_fields = ("role",)
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+        read_only_fields = ('role',)
 
 
 class AdminUserSerializer(SimpleUserSerializer):
-    """Сериалайзер пользователя для суперюзера"""
-
-    def validate(self, attrs):
-        """
-        Проверка на имя 'me' и уникальность имени с email,
-        при этом проверка не вызывает ошибку если оставить старые имя и email
-        """
-
-        username = attrs.get('username')
-        email = attrs.get('email')
-        request = self.context.get('request')
-        username_from_url = (
-            request.parser_context.get('kwargs').get('username')
-        )
-
-        name_is_not_me(username)
-        user_by_username = get_user_by_username(username)
-        user_by_email = get_user_by_email(email)
-        user_from_url = get_user_by_username(username_from_url)
-
-        if user_by_username and username_from_url != user_by_username.username:
-            raise serializers.ValidationError(
-                'Пользователь с таким именем уже существует'
-            )
-        if user_by_email and email != user_from_url.email:
-            raise serializers.ValidationError(
-                'Пользователь с таким email уже существует'
-            )
-
-        return attrs
+    """Сериалайзер пользователя для супер юзера"""
 
     class Meta():
         model = User
