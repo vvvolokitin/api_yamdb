@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.urls import include, path
 
-from .views import CategoryViewSet, GenreViewSet
+from .views import (
+    CategoryViewSet, GenreViewSet, UserCreateViewSet, UserReceiveTokenViewSet
+)
 
 if settings.DEBUG:
     from rest_framework.routers import DefaultRouter as Router
@@ -22,6 +24,20 @@ router_v1.register(
     basename='genres'
 )
 
+auth_urls = [
+    path(
+        'signup/',
+        UserCreateViewSet.as_view({'post': 'create'}),
+        name='signup'
+    ),
+    path(
+        'token/',
+        UserReceiveTokenViewSet.as_view({'post': 'create'}),
+        name='token'
+    )
+]
+
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
+    path('v1/auth/', include(auth_urls))
 ]
