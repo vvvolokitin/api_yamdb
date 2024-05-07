@@ -30,6 +30,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель 'Жанры'."""
+
     name = models.CharField(
         max_length=256,
         verbose_name='Название',

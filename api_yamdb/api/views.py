@@ -3,8 +3,8 @@ from rest_framework import filters, viewsets
 
 
 from .mixins import ListCreateDestroyViewSet
-from .serializers import CategorySerializer
-from reviews.models import Category
+from .serializers import CategorySerializer, GenreSerializer
+from reviews.models import Category, Genre
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -12,3 +12,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+class GenreViewSet(ListCreateDestroyViewSet):
+    """Вьюсет получения, добавления и удаления жанров."""
+
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
