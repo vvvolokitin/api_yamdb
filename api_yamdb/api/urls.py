@@ -8,6 +8,7 @@ if settings.DEBUG:
 else:
     from rest_framework.routers import SimpleRouter as Router
 
+app_name = 'api'
 
 router_v1 = Router()
 router_v1.register(

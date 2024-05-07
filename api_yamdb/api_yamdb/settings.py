@@ -22,7 +22,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "users.apps.UsersConfig",
+
     "api.apps.ApiConfig",
+    'reviews.apps.ReviewsConfig',
 ]
 
 MIDDLEWARE = [
@@ -40,9 +42,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'reviews.apps.ReviewsConfig',
-    'api.apps.ApiConfig',
 ]
 
 ROOT_URLCONF = "api_yamdb.urls"
