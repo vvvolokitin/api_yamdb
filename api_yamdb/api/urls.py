@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import include, path
 
-from .views import CategoryViewSet, GenreViewSet
+from .views import CategoryViewSet, GenreViewSet, TitleViewSet
 
 if settings.DEBUG:
     from rest_framework.routers import DefaultRouter as Router
@@ -20,6 +20,11 @@ router_v1.register(
     'genres',
     GenreViewSet,
     basename='genres'
+)
+router_v1.register(
+    'titles',
+    TitleViewSet,
+    basename='titles'
 )
 
 urlpatterns = [
