@@ -2,7 +2,12 @@ from django.conf import settings
 from django.urls import include, path
 
 from .views import (
-    CategoryViewSet, GenreViewSet, UserCreateViewSet, UserReceiveTokenViewSet, UserViewSet, TitleViewSet
+    CategoryViewSet,
+    GenreViewSet,
+    UserCreateViewSet,
+    UserReceiveTokenViewSet,
+    UserViewSet,
+    TitleViewSet
 )
 
 

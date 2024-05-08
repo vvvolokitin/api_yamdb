@@ -35,8 +35,8 @@ class GenreSerializer(serializers.ModelSerializer):
             'name',
             'slug',
         )
-        
-        
+
+
 class TitleSerializer(serializers.ModelSerializer):
     """Сериалайзер произведений."""
 
@@ -131,18 +131,6 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
     )
-    first_name = serializers.RegexField(
-        regex=r'^[\w.@+-]+$',
-        max_length=MAX_USER_NAME_LENGTH,
-        allow_blank=True,
-        required=False,
-    )
-    last_name = serializers.RegexField(
-        regex=r'^[\w.@+-]+$',
-        max_length=MAX_USER_NAME_LENGTH,
-        allow_blank=True,
-        required=False
-    )
 
     def validate(self, attrs):
         """Проверка на имя 'me'"""
@@ -166,4 +154,3 @@ class AdminUserSerializer(SimpleUserSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-  
