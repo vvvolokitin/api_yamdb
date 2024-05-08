@@ -39,6 +39,7 @@ class IsSuperUser(permissions.BasePermission):
     только суперпользователям и админам Джанго, либо пользователю с
     ролью админ.
     """
+
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
@@ -48,3 +49,12 @@ class IsSuperUser(permissions.BasePermission):
                 or request.user.is_superuser
             )
         )
+
+
+class IsSuperUserOrReadOnly(IsSuperUser):
+    """Проверка на суперпользователя или запроса на чтение."""
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return super().has_permission(request, view)
