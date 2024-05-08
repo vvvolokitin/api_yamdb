@@ -1,6 +1,8 @@
 from pathlib import Path
 from datetime import timedelta
 
+from core.constants import PAGES_PER_PAGINATION
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,8 +24,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
-
     "rest_framework",
     "rest_framework_simplejwt",
 
@@ -133,6 +133,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': PAGES_PER_PAGINATION
 }
 
 
