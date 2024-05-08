@@ -1,29 +1,29 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework import filters, viewsets, mixins, status
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import (
+    LimitOffsetPagination,
+    PageNumberPagination
+)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.pagination import (
-    LimitOffsetPagination, PageNumberPagination
-)
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import action
 
 from .mixins import ListCreateDestroyViewSet
 from .permissions import CustomObjectPermissions, IsSuperUser
 from .serializers import (
+    AdminUserSerializer,
     CategorySerializer,
     GenreSerializer,
+    SimpleUserSerializer,
     TitleSerializer,
     UserCreateSerializer,
-    UserRecieveTokenSerializer,
-    SimpleUserSerializer,
-    AdminUserSerializer
+    UserRecieveTokenSerializer
 )
-from reviews.models import Category, Genre, Title
 from .utils import send_confirmation_code
-
+from reviews.models import Category, Genre, Title
 
 User = get_user_model()
 
@@ -36,6 +36,24 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (
         CustomObjectPermissions,
     )
+    pagination_class = PageNumberPagination
+    filter_backends = (
+        filters.SearchFilter,
+    )
+    search_fields = (
+        'name',
+    )
+    lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -46,6 +64,24 @@ class GenreViewSet(ListCreateDestroyViewSet):
     permission_classes = (
         CustomObjectPermissions,
     )
+    pagination_class = PageNumberPagination
+    filter_backends = (
+        filters.SearchFilter,
+    )
+    search_fields = (
+        'name',
+    )
+    lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
 
 class TitleViewSet(viewsets.ModelViewSet):

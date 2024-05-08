@@ -1,10 +1,10 @@
-from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from django.contrib.auth import get_user_model
 
-from reviews.models import Category, Genre, Title
-from core.constants import MAX_USER_NAME_LENGTH, MAX_EMAIL_LENGTH
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
+from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
+from reviews.models import Category, Genre, Title
 
 User = get_user_model()
 
@@ -44,6 +44,7 @@ class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.FloatField(read_only=True)
 
     class Meta:
+        model = Title
         fields = (
             'id',
             'name',
