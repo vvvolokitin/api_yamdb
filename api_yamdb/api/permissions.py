@@ -49,6 +49,8 @@ class IsSuperUser(permissions.BasePermission):
                 or request.user.is_superuser
             )
         )
+
+
 class IsSuperUserOrReadOnly(IsSuperUser):
     """Проверка на суперпользователя или запроса на чтение."""
 
