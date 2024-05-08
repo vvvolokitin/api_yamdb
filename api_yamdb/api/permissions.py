@@ -33,21 +33,6 @@ class CustomObjectPermissions(permissions.BasePermission):
         return True
 
 
-class IsSuperUserOrReadOnly(permissions.BasePermission):
-    """Проверка на суперпользователя или запроса на чтение."""
-
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return (
-            request.user.is_authenticated
-            and (
-                request.user.is_admin()
-                or request.user.is_superuser
-            )
-        )
-
-
 class IsSuperUser(permissions.BasePermission):
     """
     Этот класс разрешений предоставляет разрешения
@@ -64,3 +49,10 @@ class IsSuperUser(permissions.BasePermission):
                 or request.user.is_superuser
             )
         )
+class IsSuperUserOrReadOnly(IsSuperUser):
+    """Проверка на суперпользователя или запроса на чтение."""
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return super().has_permission(request, view)
