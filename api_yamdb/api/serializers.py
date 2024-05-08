@@ -1,6 +1,18 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+from django.contrib.auth import get_user_model
+
 
 from reviews.models import Category, Genre, Title
+from core.constants import MAX_USER_NAME_LENGTH, MAX_EMAIL_LENGTH
+
+
+User = get_user_model()
+
+
+def name_is_not_me(username):
+    if username == 'me':
+        raise serializers.ValidationError('Имя не может быть <me>')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -23,7 +35,8 @@ class GenreSerializer(serializers.ModelSerializer):
             'name',
             'slug',
         )
-
+        
+        
 class TitleSerializer(serializers.ModelSerializer):
     """Сериалайзер произведений."""
 
@@ -40,4 +53,117 @@ class TitleSerializer(serializers.ModelSerializer):
             'genre',
             'category',
         )
-    
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    """Сериалайзер для создания новых пользователей."""
+
+    email = serializers.EmailField(
+        max_length=MAX_EMAIL_LENGTH,
+        allow_blank=False,
+        required=True,
+    )
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=MAX_USER_NAME_LENGTH,
+        allow_blank=False,
+        required=True,
+    )
+
+    def validate(self, attrs):
+        """
+        Проверка на имя 'me' и уникальность имени с email по отдельности,
+        если юзер с таким именем и почтой существует,
+        то ошибки нет(необходимо для повторной отправки кода подтверждения)
+        """
+
+        username = attrs.get('username')
+        email = attrs.get('email')
+
+        name_is_not_me(username)
+        user_by_username = User.objects.filter(username=username).first()
+        user_by_email = User.objects.filter(email=email).first()
+
+        if user_by_username and not user_by_email:
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует'
+            )
+        if user_by_email and not user_by_username:
+            raise serializers.ValidationError(
+                'Пользователь с таким email уже существует'
+            )
+
+        return attrs
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
+class UserRecieveTokenSerializer(serializers.Serializer):
+    """Сериализатор для объекта класса User при получении токена JWT."""
+
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=MAX_USER_NAME_LENGTH,
+        allow_blank=False,
+        required=True
+    )
+    confirmation_code = serializers.CharField(
+        allow_blank=False,
+        required=True
+    )
+
+
+class SimpleUserSerializer(serializers.ModelSerializer):
+    """Сериалайзер пользователя для самого пользователя"""
+
+    email = serializers.EmailField(
+        max_length=MAX_EMAIL_LENGTH,
+        allow_blank=False,
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=MAX_USER_NAME_LENGTH,
+        allow_blank=False,
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    first_name = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=MAX_USER_NAME_LENGTH,
+        allow_blank=True,
+        required=False,
+    )
+    last_name = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=MAX_USER_NAME_LENGTH,
+        allow_blank=True,
+        required=False
+    )
+
+    def validate(self, attrs):
+        """Проверка на имя 'me'"""
+        username = attrs.get('username')
+        name_is_not_me(username)
+        return attrs
+
+    class Meta():
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+        read_only_fields = ('role',)
+
+
+class AdminUserSerializer(SimpleUserSerializer):
+    """Сериалайзер пользователя для супер юзера"""
+
+    class Meta():
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+  
