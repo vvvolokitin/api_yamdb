@@ -33,7 +33,7 @@ class CustomObjectPermissions(permissions.BasePermission):
         return True
 
 
-class IsAdminUserOrReadOnly(permissions.BasePermission):
+class IsSuperUserOrReadOnly(permissions.BasePermission):
     """Проверка на суперпользователя или запроса на чтение."""
 
     def has_permission(self, request, view):

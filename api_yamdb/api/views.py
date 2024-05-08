@@ -12,7 +12,11 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from .mixins import ListCreateDestroyViewSet
-from .permissions import CustomObjectPermissions, IsSuperUser, IsAdminUserOrReadOnly
+from .permissions import (
+    CustomObjectPermissions,
+    IsSuperUser,
+    IsSuperUserOrReadOnly
+)
 from .serializers import (
     AdminUserSerializer,
     CategorySerializer,
@@ -34,7 +38,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (
-        IsAdminUserOrReadOnly,
+        IsSuperUserOrReadOnly,
     )
     pagination_class = PageNumberPagination
     filter_backends = (
@@ -62,7 +66,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (
-        IsAdminUserOrReadOnly,
+        IsSuperUserOrReadOnly,
     )
     pagination_class = PageNumberPagination
     filter_backends = (
