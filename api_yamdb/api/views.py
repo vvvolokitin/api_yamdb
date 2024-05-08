@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import filters, viewsets, mixins, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 
@@ -13,12 +14,13 @@ from .permissions import CustomObjectPermissions, IsSuperUser
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
+    TitleSerializer,
     UserCreateSerializer,
     UserRecieveTokenSerializer,
     SimpleUserSerializer, 
     AdminUserSerializer
 )
-from reviews.models import Category, Genre
+from reviews.models import Category, Genre, Title
 from .utils import send_confirmation_code
 
 
@@ -30,6 +32,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (
+        CustomObjectPermissions,
+    )
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -37,7 +42,32 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (
+        CustomObjectPermissions,
+    )
+class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет получения, добавления и удаления произведений."""
 
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (
+        CustomObjectPermissions,
+    )
+    pagination_class = LimitOffsetPagination
+
+    def perform_create(self, serializer):
+        serializer.save(
+            category=get_object_or_404(
+                Category, slug=self.request.data.get('category')
+            ),
+            genre=Genre.objects.filter(
+                slug__in=self.request.data.getlist('genre')
+            ),
+        )
+
+    def perform_update(self, serializer):
+        self.perform_create(serializer)
+        
 
 class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """Вьюсет для создания новых пользователей"""

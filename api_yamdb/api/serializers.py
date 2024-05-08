@@ -2,7 +2,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import get_user_model
 
-from reviews.models import Category, Genre
+
+from reviews.models import Category, Genre, Title
 from core.constants import MAX_USER_NAME_LENGTH, MAX_EMAIL_LENGTH
 
 
@@ -34,10 +35,28 @@ class GenreSerializer(serializers.ModelSerializer):
             'name',
             'slug',
         )
+        
+        
+class TitleSerializer(serializers.ModelSerializer):
+    """Сериалайзер произведений."""
+
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
+    rating = serializers.FloatField(read_only=True)
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category',
+        )
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Сериалайзер для создания новых пользователей"""
+    """Сериалайзер для создания новых пользователей."""
 
     email = serializers.EmailField(
         max_length=MAX_EMAIL_LENGTH,
@@ -147,3 +166,4 @@ class AdminUserSerializer(SimpleUserSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
+  

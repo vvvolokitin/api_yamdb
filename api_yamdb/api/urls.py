@@ -2,8 +2,9 @@ from django.conf import settings
 from django.urls import include, path
 
 from .views import (
-    CategoryViewSet, GenreViewSet, UserCreateViewSet, UserReceiveTokenViewSet, UserViewSet
+    CategoryViewSet, GenreViewSet, UserCreateViewSet, UserReceiveTokenViewSet, UserViewSet, TitleViewSet
 )
+
 
 if settings.DEBUG:
     from rest_framework.routers import DefaultRouter as Router
@@ -28,6 +29,11 @@ router_v1.register(
     UserViewSet,
     basename='users'
 )
+router_v1.register(
+    'titles',
+    TitleViewSet,
+    basename='titles'
+)
 
 auth_urls = [
     path(
@@ -41,6 +47,7 @@ auth_urls = [
         name='token'
     )
 ]
+
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
