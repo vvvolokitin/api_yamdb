@@ -1,17 +1,16 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import (
-    LimitOffsetPagination,
-    PageNumberPagination
-)
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from .mixins import ListCreateDestroyViewSet
+from .filters import TitleFilter
 from .permissions import (
     CustomObjectPermissions,
     IsSuperUser,
@@ -94,9 +93,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (
-        CustomObjectPermissions,
+        IsSuperUserOrReadOnly,
     )
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
+    filter_backends = (
+        DjangoFilterBackend,
+    )
+    filterset_class = TitleFilter
 
     def perform_create(self, serializer):
         serializer.save(
@@ -110,6 +113,21 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         self.perform_create(serializer)
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            self.get_object(),
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
