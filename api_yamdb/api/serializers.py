@@ -52,6 +52,7 @@ class TitleSerializer(serializers.ModelSerializer):
             'description',
             'genre',
             'category',
+            'rating',
         )
 
 
