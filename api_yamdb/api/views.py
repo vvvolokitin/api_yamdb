@@ -131,7 +131,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    """Вьюсет для создания новых пользователей"""
+    """Вьюсет для создания новых пользователей."""
 
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
@@ -155,9 +155,10 @@ class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 class UserReceiveTokenViewSet(
-    mixins.CreateModelMixin, viewsets.GenericViewSet
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet
 ):
-    """Вьюсет для получения токена"""
+    """Вьюсет для получения токена."""
 
     queryset = User.objects.all()
     serializer_class = UserRecieveTokenSerializer
@@ -185,7 +186,7 @@ class UserViewSet(
 ):
     """
     Вьюсет для получения/создания/обновления/удаления новых пользователей
-    админом либо самим пользователем
+    админом либо самим пользователем.
     """
 
     queryset = User.objects.all()
@@ -203,7 +204,7 @@ class UserViewSet(
     def get_user_by_username(self, request, username):
         """
         Извлечение данных пользователя по его username
-        админом и обновление/удаление информации
+        админом и обновление/удаление информации.
         """
         user = get_object_or_404(User, username=username)
         if request.method == 'PATCH':
