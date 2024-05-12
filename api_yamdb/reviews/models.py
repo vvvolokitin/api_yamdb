@@ -1,9 +1,9 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 from .validators import slug_validator, year_validator
-from core.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG, COMMENT_LENGHT
+from core.constants import COMMENT_LENGHT, MAX_LENGTH_NAME, MAX_LENGTH_SLUG
 
 User = get_user_model()
 
@@ -109,18 +109,33 @@ class Title(models.Model):
 
 class Review(models.Model):
     """Модель 'Отзывы'."""
+
     text = models.TextField('Текст отзыва')
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        verbose_name='Автор', related_name='reviews')
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+        related_name='reviews'
+    )
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, verbose_name='Произведение',
-        related_name='reviews')
-    score = models.IntegerField(validators=[
-        MinValueValidator(1), MaxValueValidator(10),
-    ], verbose_name='Рейтинг', null=True)
-    pub_date = models.DateTimeField('Дата публикации',
-                                    auto_now_add=True, db_index=True)
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение',
+        related_name='reviews'
+    )
+    score = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(10),
+        ],
+        verbose_name='Рейтинг',
+        null=True
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True,
+        db_index=True
+    )
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -139,6 +154,7 @@ class Review(models.Model):
 
 class Comment(models.Model):
     """Модель 'Комментарии'."""
+
     review = models.ForeignKey(
         Review,
         verbose_name='Произведение',
