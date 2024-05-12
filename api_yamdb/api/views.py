@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
@@ -23,10 +24,12 @@ from .serializers import (
     SimpleUserSerializer,
     TitleSerializer,
     UserCreateSerializer,
-    UserRecieveTokenSerializer
+    UserRecieveTokenSerializer,
+    CommentSerializer,
+    ReviewSerializer,
 )
 from .utils import send_confirmation_code
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 
 User = get_user_model()
 
@@ -90,7 +93,9 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет получения, добавления и удаления произведений."""
 
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).order_by('rating')
     serializer_class = TitleSerializer
     permission_classes = (
         IsSuperUserOrReadOnly,
@@ -243,3 +248,78 @@ class UserViewSet(
 
         serializer = AdminUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """Вьюсет для получения/создания/обновления/удаления комментариев."""
+
+    serializer_class = CommentSerializer
+    permission_classes = (CustomObjectPermissions,)
+
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
+        )
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
+        )
+        serializer.save(author=self.request.user, review=review)
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            self.get_object(),
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """Вьюсет для получения/создания/обновления/удаления ревью."""
+
+    serializer_class = ReviewSerializer
+    permission_classes = (CustomObjectPermissions,)
+
+    def get_queryset(self):
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
+        serializer.save(
+            author=self.request.user,
+            title=title
+        )
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            self.get_object(),
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)

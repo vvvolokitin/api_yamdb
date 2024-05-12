@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Comment, Review
 
 User = get_user_model()
 
@@ -154,4 +155,59 @@ class AdminUserSerializer(SimpleUserSerializer):
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Сериалайзер комментариев."""
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+
+    class Meta:
+        model = Comment
+        fields = (
+            'id',
+            'author',
+            'text',
+            'pub_date'
+        )
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    """Сериалайзер отзывов."""
+
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
+
+    def validate(self, data):
+        """Проверка на наличие отзыва."""
+        request = self.context.get('request')
+        author = request.user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
+        if (request.method == 'POST' and Review.objects.filter(
+                title=title, author=author).exists()):
+            raise serializers.ValidationError(
+                'Вы уже оставили отзыв на это произведение'
+            )
+        return data
+
+    class Meta:
+        model = Review
+        fields = (
+            'id',
+            'author',
+            'title',
+            'text',
+            'score',
+            'pub_date'
         )
