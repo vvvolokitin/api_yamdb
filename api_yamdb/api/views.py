@@ -260,6 +260,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
         serializer.save(author=self.request.user, review=review)
 
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
     def partial_update(self, request, *args, **kwargs):
         serializer = self.get_serializer(
             self.get_object(),
@@ -269,9 +274,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
-
-    def perform_update(self, serializer):
-        self.perform_create(serializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -287,6 +289,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
         serializer.save(author=self.request.user, title=title)
 
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
     def partial_update(self, request, *args, **kwargs):
         serializer = self.get_serializer(
             self.get_object(),
@@ -296,6 +303,3 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
-
-    def perform_update(self, serializer):
-        self.perform_create(serializer)

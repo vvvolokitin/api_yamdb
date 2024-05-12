@@ -183,7 +183,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             """Проверка на наличие отзыва."""
             if Review.objects.filter(
                     author=self.context['request'].user,
-                    title=self.context['title']
+                    title_id=self.context['view'].kwargs.get('title_id')
             ).exists():
                 raise serializers.ValidationError(
                     'Отзыв уже существует'
