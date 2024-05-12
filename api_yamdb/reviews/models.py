@@ -1,9 +1,11 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from .validators import slug_validator, year_validator
 from core.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG, COMMENT_LENGHT
-from users.models import MyUser
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -109,7 +111,7 @@ class Review(models.Model):
     """Модель 'Отзывы'."""
     text = models.TextField('Текст отзыва')
     author = models.ForeignKey(
-        MyUser, on_delete=models.CASCADE,
+        User, on_delete=models.CASCADE,
         verbose_name='Автор', related_name='reviews')
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, verbose_name='Произведение',
@@ -125,8 +127,11 @@ class Review(models.Model):
         verbose_name_plural = 'Отзывы'
         ordering = ('pub_date',)
         constraints = [
-            models.UniqueConstraint(fields=['title', 'author'],
-                                    name='unique_review')]
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            )
+        ]
 
     def __str__(self):
         return f'{self.title} - {self.author}'
@@ -135,15 +140,27 @@ class Review(models.Model):
 class Comment(models.Model):
     """Модель 'Комментарии'."""
     review = models.ForeignKey(
-        Review, verbose_name='Произведение', on_delete=models.CASCADE,
-        related_name='comments')
+        Review,
+        verbose_name='Произведение',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
     text = models.TextField('Текст комментария')
-    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    created_at = models.DateTimeField(
+        'Дата создания',
+        auto_now_add=True
+    )
     author = models.ForeignKey(
-        MyUser, verbose_name='Автор', on_delete=models.CASCADE,
-        related_name='comments')
-    pub_date = models.DateTimeField('Дата публикации',
-                                    auto_now_add=True, db_index=True)
+        User,
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True,
+        db_index=True
+    )
 
     class Meta:
         verbose_name = 'Комментарий'
