@@ -164,7 +164,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'text')
+        fields = ('id', 'author', 'text', 'pub_date')
         read_only_fields = ('author',)
 
 
@@ -179,7 +179,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'title', 'text', 'score', 'pub_date')
         read_only_fields = ('author', 'title')
 
-        def validate(self, attrs):
+        def validate(self, data):
             """Проверка на наличие отзыва."""
             if Review.objects.filter(
                     author=self.context['request'].user,
@@ -188,4 +188,4 @@ class ReviewSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'Отзыв уже существует'
                 )
-            return attrs
+            return data

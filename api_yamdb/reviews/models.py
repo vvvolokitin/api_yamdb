@@ -127,7 +127,8 @@ class Review(models.Model):
 class Comment(models.Model):
     """Модель 'Комментарии'."""
     review = models.ForeignKey(
-        Review, verbose_name='Произведение', on_delete=models.CASCADE)
+        Review, verbose_name='Произведение', on_delete=models.CASCADE,
+        related_name='comments')
     text = models.TextField('Текст комментария')
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)
     author = models.ForeignKey(
