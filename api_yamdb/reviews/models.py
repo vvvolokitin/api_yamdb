@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from .validators import slug_validator, year_validator
 from core.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
@@ -108,7 +109,9 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, verbose_name='Произведение',
         related_name='reviews')
-    score = models.IntegerField('Рейтинг', default=0)
+    score = models.IntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(10),
+    ], verbose_name='Рейтинг')
     pub_date = models.DateTimeField('Дата публикации',
                                     auto_now_add=True, db_index=True)
 
