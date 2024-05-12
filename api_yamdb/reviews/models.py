@@ -111,7 +111,7 @@ class Review(models.Model):
         related_name='reviews')
     score = models.IntegerField(validators=[
         MinValueValidator(1), MaxValueValidator(10),
-    ], verbose_name='Рейтинг')
+    ], verbose_name='Рейтинг', null=True)
     pub_date = models.DateTimeField('Дата публикации',
                                     auto_now_add=True, db_index=True)
 

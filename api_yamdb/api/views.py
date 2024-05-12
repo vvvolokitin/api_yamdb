@@ -28,7 +28,7 @@ from .serializers import (
     ReviewSerializer,
 )
 from .utils import send_confirmation_code
-from reviews.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Genre, Title, Review
 
 User = get_user_model()
 
@@ -249,10 +249,8 @@ class UserViewSet(
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для получения/создания/обновления/удаления комментариев."""
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (CustomObjectPermissions,)
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
@@ -260,20 +258,18 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        serializer.save(review=review)
+        serializer.save(author=self.request.user, review=review)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для получения/создания/обновления/удаления ревью."""
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (CustomObjectPermissions,)
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        title = get_object_or_404(Review, id=self.kwargs['review_id'])
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Review, id=self.kwargs['review_id'])
-        serializer.save(title=title)
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        serializer.save(author=self.request.user, title=title)

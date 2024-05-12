@@ -164,8 +164,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'text', 'title', 'rating')
-        read_only_fields = ('author', 'title', 'rating')
+        fields = ('id', 'author', 'text')
+        read_only_fields = ('author',)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -176,8 +176,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'author', 'title', 'text', 'rating')
-        read_only_fields = ('author', 'title', 'rating')
+        fields = ('id', 'author', 'title', 'text', 'score', 'pub_date')
+        read_only_fields = ('author', 'title')
 
         def validate(self, attrs):
             """Проверка на наличие отзыва."""
