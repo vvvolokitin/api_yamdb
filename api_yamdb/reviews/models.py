@@ -2,10 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from .validators import slug_validator, year_validator
-from core.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
+from core.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG, COMMENT_LENGHT
 from users.models import MyUser
-
-COMMENT_LENGHT = 15
 
 
 class Category(models.Model):
