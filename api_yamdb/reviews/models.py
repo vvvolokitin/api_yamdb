@@ -2,6 +2,9 @@ from django.db import models
 
 from .validators import slug_validator, year_validator
 from core.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
+from users.models import MyUser
+
+COMMENT_LENGHT = 15
 
 
 class Category(models.Model):
@@ -94,3 +97,46 @@ class Title(models.Model):
         blank=True,
         related_name='titles',
     )
+
+
+class Review(models.Model):
+    """Модель 'Отзывы'."""
+    text = models.TextField('Текст отзыва')
+    author = models.ForeignKey(
+        MyUser, on_delete=models.CASCADE,
+        verbose_name='Автор', related_name='reviews')
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, verbose_name='Произведение',
+        related_name='reviews')
+    score = models.IntegerField('Рейтинг', default=0)
+    pub_date = models.DateTimeField('Дата публикации',
+                                    auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ('pub_date',)
+
+    def __str__(self):
+        return f'{self.title} - {self.author}'
+
+
+class Comment(models.Model):
+    """Модель 'Комментарии'."""
+    review = models.ForeignKey(
+        Review, verbose_name='Произведение', on_delete=models.CASCADE)
+    text = models.TextField('Текст комментария')
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    author = models.ForeignKey(
+        MyUser, verbose_name='Автор', on_delete=models.CASCADE,
+        related_name='comments')
+    pub_date = models.DateTimeField('Дата публикации',
+                                    auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ('created_at',)
+
+        def __str__(self):
+            return self.text[:COMMENT_LENGHT]

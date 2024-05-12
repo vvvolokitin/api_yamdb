@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Comment, Review
 
 User = get_user_model()
 
@@ -155,3 +155,37 @@ class AdminUserSerializer(SimpleUserSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Сериалайзер комментариев."""
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username')
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'author', 'text', 'title', 'rating')
+        read_only_fields = ('author', 'title', 'rating')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    """Сериалайзер отзывов."""
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True)
+    title = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ('id', 'author', 'title', 'text', 'rating')
+        read_only_fields = ('author', 'title', 'rating')
+
+        def validate(self, attrs):
+            """Проверка на наличие отзыва."""
+            if Review.objects.filter(
+                    author=self.context['request'].user,
+                    title=self.context['title']
+            ).exists():
+                raise serializers.ValidationError(
+                    'Отзыв уже существует'
+                )
+            return attrs

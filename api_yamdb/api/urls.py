@@ -7,7 +7,9 @@ from .views import (
     UserCreateViewSet,
     UserReceiveTokenViewSet,
     UserViewSet,
-    TitleViewSet
+    TitleViewSet,
+    ReviewViewSet,
+    CommentViewSet,
 )
 
 
@@ -38,6 +40,16 @@ router_v1.register(
     'titles',
     TitleViewSet,
     basename='titles'
+)
+router_v1.register(
+    'titles',
+    ReviewViewSet,
+    basename='reviews'
+)
+router_v1.register(
+    'titles',
+    CommentViewSet,
+    basename='comments'
 )
 
 auth_urls = [
