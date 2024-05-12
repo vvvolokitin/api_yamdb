@@ -160,20 +160,33 @@ class AdminUserSerializer(SimpleUserSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Сериалайзер комментариев."""
+
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username')
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'text', 'pub_date')
-        read_only_fields = ('author',)
+        fields = (
+            'id',
+            'author',
+            'text',
+            'pub_date'
+        )
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериалайзер отзывов."""
+
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True)
-    title = serializers.SlugRelatedField(slug_field='name', read_only=True)
+        slug_field='username',
+        read_only=True
+    )
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
 
     def validate(self, data):
         """Проверка на наличие отзыва."""
@@ -190,5 +203,11 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'author', 'title', 'text', 'score', 'pub_date')
-        read_only_fields = ('author', 'title')
+        fields = (
+            'id',
+            'author',
+            'title',
+            'text',
+            'score',
+            'pub_date'
+        )
