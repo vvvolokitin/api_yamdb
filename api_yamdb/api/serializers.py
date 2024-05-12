@@ -99,7 +99,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = (
+            'username',
+            'email'
+        )
 
 
 class UserRecieveTokenSerializer(serializers.Serializer):
@@ -143,7 +146,12 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta():
         model = User
         fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
         )
         read_only_fields = ('role',)
 
