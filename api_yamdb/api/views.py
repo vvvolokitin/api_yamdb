@@ -270,6 +270,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
+    def perform_update(self, serializer):
+        self.perform_create(serializer)
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для получения/создания/обновления/удаления ревью."""
@@ -293,3 +296,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        self.perform_create(serializer)
