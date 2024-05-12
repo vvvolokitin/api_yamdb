@@ -260,6 +260,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
         serializer.save(author=self.request.user, review=review)
 
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для получения/создания/обновления/удаления ревью."""
@@ -273,3 +278,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
         serializer.save(author=self.request.user, title=title)
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
