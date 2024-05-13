@@ -62,15 +62,15 @@ class Title(models.Model):
     name = models.CharField(
         max_length=MAX_LENGTH_NAME,
         verbose_name='Название',
-        help_text='Выберите название произведения'
+        help_text='Выберите название произведения',
+        blank=False
     )
     year = models.PositiveSmallIntegerField(
         verbose_name='Год',
         validators=[
             year_validator,
         ],
-        null=True,
-        blank=True,
+        blank=False,
         help_text=(
             'Год выпуска не может быть больше текущего.'
         ),
@@ -83,14 +83,13 @@ class Title(models.Model):
         Genre,
         verbose_name='Жанр',
         related_name='titles',
-        blank=True,
+        blank=False,
     )
     category = models.ForeignKey(
         Category,
         verbose_name='Категория',
         on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        blank=False,
         related_name='titles',
     )
 
