@@ -42,7 +42,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsSuperUserOrReadOnly,
     )
-    pagination_class = PageNumberPagination
     filter_backends = (
         filters.SearchFilter,
     )
@@ -70,7 +69,6 @@ class GenreViewSet(ListCreateDestroyViewSet):
     permission_classes = (
         IsSuperUserOrReadOnly,
     )
-    pagination_class = PageNumberPagination
     filter_backends = (
         filters.SearchFilter,
     )
@@ -78,16 +76,6 @@ class GenreViewSet(ListCreateDestroyViewSet):
         'name',
     )
     lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -100,7 +88,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsSuperUserOrReadOnly,
     )
-    pagination_class = PageNumberPagination
     filter_backends = (
         DjangoFilterBackend,
     )
@@ -186,9 +173,7 @@ class UserReceiveTokenViewSet(
         return Response(message, status=status.HTTP_200_OK)
 
 
-class UserViewSet(
-    viewsets.ModelViewSet
-):
+class UserViewSet(viewsets.ModelViewSet):
     """
     Вьюсет для получения/создания/обновления/удаления новых пользователей
     админом либо самим пользователем.

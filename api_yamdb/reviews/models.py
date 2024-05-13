@@ -23,10 +23,7 @@ class Category(models.Model):
         help_text=(
             'Идентификатор страницы для URL; '
             'разрешены символы латиницы, цифры, дефис и подчёркивание.'
-        ),
-        validators=[
-            slug_validator,
-        ]
+        )
     )
 
     class Meta:
@@ -50,10 +47,7 @@ class Genre(models.Model):
         help_text=(
             'Идентификатор страницы для URL; '
             'разрешены символы латиницы, цифры, дефис и подчёркивание.'
-        ),
-        validators=[
-            slug_validator,
-        ]
+        )
     )
 
     class Meta:
@@ -70,7 +64,7 @@ class Title(models.Model):
         verbose_name='Название',
         help_text='Выберите название произведения'
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='Год',
         validators=[
             year_validator,
@@ -84,7 +78,6 @@ class Title(models.Model):
     description = models.TextField(
         verbose_name='Описание',
         blank=True,
-        null=True,
     )
     genre = models.ManyToManyField(
         Genre,
@@ -125,8 +118,14 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10),
+            MinValueValidator(
+                1,
+                message='Оценка должна быть не ниже 1'
+            ),
+            MaxValueValidator(
+                10,
+                message='Оценка должна быть не выше 10'
+            ),
         ],
         verbose_name='Рейтинг',
         null=True

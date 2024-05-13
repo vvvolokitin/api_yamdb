@@ -1,11 +1,13 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
-from .models import MyUser
+User = get_user_model()
 
 
+@admin.register(User)
 class MyUserAdmin(UserAdmin):
-    model = MyUser
+    model = User
     list_display = (
         'username',
         'email',
@@ -18,6 +20,3 @@ class MyUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ('Extra Fields', {'fields': ('bio', 'role')}),
     )
-
-
-admin.site.register(MyUser, MyUserAdmin)
