@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .mixins import ListCreateDestroyViewSet, PatchMixin
+from .mixins import ListCreateDestroyViewSet
 from .filters import TitleFilter
 from .permissions import (
     CustomObjectPermissions,
