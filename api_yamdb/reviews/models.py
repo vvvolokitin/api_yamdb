@@ -63,7 +63,7 @@ class Title(models.Model):
         max_length=MAX_LENGTH_NAME,
         verbose_name='Название',
         help_text='Выберите название произведения',
-        blank=False
+        blank=False,
     )
     year = models.PositiveSmallIntegerField(
         verbose_name='Год',
@@ -90,6 +90,7 @@ class Title(models.Model):
         verbose_name='Категория',
         on_delete=models.SET_NULL,
         blank=False,
+        null=True,
         related_name='titles',
     )
 

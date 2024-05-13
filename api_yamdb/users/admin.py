@@ -7,7 +7,6 @@ User = get_user_model()
 
 @admin.register(User)
 class MyUserAdmin(UserAdmin):
-    model = User
     list_display = (
         'username',
         'email',

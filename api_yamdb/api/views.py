@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .mixins import ListCreateDestroyViewSet
+from .mixins import ListCreateDestroyViewSet, PatchMixin
 from .filters import TitleFilter
 from .permissions import (
     CustomObjectPermissions,
@@ -34,7 +34,7 @@ from reviews.models import Category, Genre, Title, Review
 User = get_user_model()
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(ListCreateDestroyViewSet):
     """Вьюсет получения, добавления и удаления категорий."""
 
     queryset = Category.objects.all()
@@ -49,16 +49,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
         'name',
     )
     lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
