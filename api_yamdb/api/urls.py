@@ -4,12 +4,12 @@ from django.urls import include, path
 from .v1.views import (
     CategoryViewSet,
     GenreViewSet,
-    UserReceiveTokenViewSet,
     UserViewSet,
     TitleViewSet,
     ReviewViewSet,
     CommentViewSet,
     create_user,
+    get_token
 )
 
 
@@ -60,7 +60,7 @@ auth_urls = [
     ),
     path(
         'token/',
-        UserReceiveTokenViewSet.as_view({'post': 'create'}),
+        get_token,  # UserReceiveTokenViewSet.as_view({'post': 'create'}),
         name='token'
     )
 ]

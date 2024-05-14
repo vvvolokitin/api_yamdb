@@ -110,31 +110,23 @@ def create_user(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class UserReceiveTokenViewSet(
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
-    """Вьюсет для получения токена."""
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_token(request):
+    """Функция для получения токена."""
 
-    queryset = User.objects.all()
-    serializer_class = UserRecieveTokenSerializer
-    permission_classes = (AllowAny,)
+    serializer = UserRecieveTokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-    def create(self, request):
-        """Предоставляет пользователю JWT токен по коду подтверждения."""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
-        confirmation_code = serializer.validated_data.get('confirmation_code')
+    username = serializer.validated_data.get('username')
+    confirmation_code = serializer.validated_data.get('confirmation_code')
+    user = get_object_or_404(User, username=username)
+    if not default_token_generator.check_token(user, confirmation_code):
+        message = {'confirmation_code': 'Некорректный код подтверждения'}
+        return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-        user = get_object_or_404(User, username=username)
-
-        if not default_token_generator.check_token(user, confirmation_code):
-            message = {'confirmation_code': 'Некорректный код подтверждения'}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
-        message = {'token': str(AccessToken.for_user(user))}
-        return Response(message, status=status.HTTP_200_OK)
+    message = {'token': str(AccessToken.for_user(user))}
+    return Response(message, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):

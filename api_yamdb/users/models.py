@@ -12,32 +12,11 @@ class CustomUserModel(AbstractUser):
         MODERATOR = 'moderator'
         ADMIN = 'admin'
 
-    # username = models.CharField(
-    #     max_length=150,
-    #     verbose_name='имя пользователя',
-    #     unique=True,
-    #     validators=[
-    #         RegexValidator(
-    #             regex=r'^[\w.@+-]+$',
-    #             message='Недопустимый символ в имя пользователя'
-    #         )
-    #     ],
-    # )
     email = models.EmailField(
         max_length=MAX_EMAIL_LENGTH,
         unique=True,
         verbose_name='email'
     )
-    # first_name = models.CharField(
-    #     max_length=MAX_USER_NAME_LENGTH,
-    #     verbose_name='имя',
-    #     blank=True
-    # )
-    # last_name = models.CharField(
-    #     max_length=MAX_USER_NAME_LENGTH,
-    #     verbose_name='фамилия',
-    #     blank=True
-    # )
     bio = models.TextField(verbose_name='биография', blank=True)
     role = models.CharField(
         max_length=MAX_ROLE_LENGTH,

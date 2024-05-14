@@ -196,18 +196,3 @@ class ReviewSerializer(serializers.ModelSerializer):
                 message='Вы уже оставили отзыв на это произведение'
             )
         ]
-
-
-
-
-    # email = serializers.EmailField(
-    #     max_length=MAX_EMAIL_LENGTH,
-    #     required=True,
-    #     validators=[UniqueValidator(queryset=User.objects.all())]
-    # )
-    # username = serializers.RegexField(
-    #     regex=r'^[\w.@+-]+$',
-    #     max_length=MAX_USER_NAME_LENGTH,
-    #     required=True,
-    #     validators=[UniqueValidator(queryset=User.objects.all())]
-    # )
