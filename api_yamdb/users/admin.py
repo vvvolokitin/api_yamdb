@@ -6,7 +6,7 @@ User = get_user_model()
 
 
 @admin.register(User)
-class MyUserAdmin(UserAdmin):
+class CustomUserAdmin(UserAdmin):
     list_display = (
         'username',
         'email',

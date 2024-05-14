@@ -4,12 +4,12 @@ from django.urls import include, path
 from .v1.views import (
     CategoryViewSet,
     GenreViewSet,
-    UserCreateViewSet,
     UserReceiveTokenViewSet,
     UserViewSet,
     TitleViewSet,
     ReviewViewSet,
     CommentViewSet,
+    create_user,
 )
 
 
@@ -55,7 +55,7 @@ router_v1.register(
 auth_urls = [
     path(
         'signup/',
-        UserCreateViewSet.as_view({'post': 'create'}),
+        create_user,
         name='signup'
     ),
     path(
