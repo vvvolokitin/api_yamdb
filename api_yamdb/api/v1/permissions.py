@@ -1,34 +1,28 @@
 from rest_framework import permissions
 
 
-class CustomObjectPermissions(permissions.BasePermission):
+class ReadOrAuthenticatedOrInAuthorModerAdmin(permissions.BasePermission):
     """
-    Этот класс разрешений предоставляет настраиваемые разрешения
-    на основе типа запроса, проверки авторства объекта либо роли пользователя.
+    Класс разрешений на получение, создание, обновление, удаление контента
+
+    Аноним может только смотреть, но не трогать;
+    аутентифицированный пользователь: смотреть, создавать, менять
+    и удалять свой контент;
+    админ и модер может создавать, менять и удалять чужой контент.
     """
 
     def has_permission(self, request, view):
-        """
-        Проверка на то, что запрос GET, HEAD или OPTIONS,
-        иначе проверка на аутентификацию.
-        """
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return request.user.is_authenticated
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+        )
 
     def has_object_permission(self, request, view, obj):
-        """
-        При запросе конкретного обьекта, если запрос на изменение/удаление,
-        то проверяем, что автор запроса == автор обьекта, автор запроса
-        модератор или админ. В остальных случаях возвращаем True.
-        """
-        if request.method not in permissions.SAFE_METHODS:
-            return (
-                obj.author == request.user
-                or request.user.is_moderator
-                or request.user.is_admin
-            )
-        return True
+        return request.method in permissions.SAFE_METHODS or (
+            obj.author == request.user
+            or request.user.is_moderator
+            or request.user.is_admin
+        )
 
 
 class IsSuperUser(permissions.BasePermission):

@@ -13,7 +13,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from .mixins import ListCreateDestroyViewSet, PatchModelMixin
 from .filters import TitleFilter
 from .permissions import (
-    CustomObjectPermissions,
+    ReadOrAuthenticatedOrInAuthorModerAdmin,
     IsSuperUser,
     IsSuperUserOrReadOnly
 )
@@ -149,7 +149,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def user_by_username(self, request, username):
         """Извлечение данных пользователя админом."""
         user = get_object_or_404(User, username=username)
-        serializer = UserSerializer(user)
+        serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @user_by_username.mapping.patch
@@ -177,13 +177,13 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def myself(self, request):
         """Позволяет пользователю получить информацию о себе."""
-        serializer = UserSerializer(request.user)  
+        serializer = self.get_serializer(request.user)  
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @myself.mapping.patch
     def update_myself(self, request):
         """Позволяет пользователю обновить информацию о себе."""
-        serializer = UserSerializer(
+        serializer = self.get_serializer(
             request.user,
             data=request.data,
             partial=True,
@@ -202,7 +202,7 @@ class CommentViewSet(
     """Вьюсет для получения/создания/обновления/удаления комментариев."""
 
     serializer_class = CommentSerializer
-    permission_classes = (CustomObjectPermissions,)
+    permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -227,7 +227,7 @@ class ReviewViewSet(
     """Вьюсет для получения/создания/обновления/удаления ревью."""
 
     serializer_class = ReviewSerializer
-    permission_classes = (CustomObjectPermissions,)
+    permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)
 
     def get_queryset(self):
         title = get_object_or_404(
