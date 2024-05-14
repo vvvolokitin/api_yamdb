@@ -13,7 +13,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from .mixins import ListCreateDestroyViewSet, PatchModelMixin
 from .filters import TitleFilter
 from .permissions import (
-    CustomObjectPermissions,
+    ReadOrAuthenticatedOrInAuthorModerAdmin,
     IsSuperUser,
     IsSuperUserOrReadOnly
 )
@@ -202,7 +202,7 @@ class CommentViewSet(
     """Вьюсет для получения/создания/обновления/удаления комментариев."""
 
     serializer_class = CommentSerializer
-    permission_classes = (CustomObjectPermissions,)
+    permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -227,7 +227,7 @@ class ReviewViewSet(
     """Вьюсет для получения/создания/обновления/удаления ревью."""
 
     serializer_class = ReviewSerializer
-    permission_classes = (CustomObjectPermissions,)
+    permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)
 
     def get_queryset(self):
         title = get_object_or_404(
