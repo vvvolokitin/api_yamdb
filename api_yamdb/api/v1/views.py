@@ -4,7 +4,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -18,17 +18,16 @@ from .permissions import (
     IsSuperUserOrReadOnly
 )
 from .serializers import (
-    AdminUserSerializer,
     CategorySerializer,
     GenreSerializer,
-    SimpleUserSerializer,
+    UserSerializer,
     TitleSerializer,
     UserCreateSerializer,
     UserRecieveTokenSerializer,
     CommentSerializer,
     ReviewSerializer,
 )
-from .utils import send_confirmation_code
+
 from reviews.models import Category, Genre, Title, Review
 
 User = get_user_model()
@@ -99,55 +98,35 @@ class TitleViewSet(
         )
 
 
-class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    """Вьюсет для создания новых пользователей."""
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_user(request):
+    """Функция для создания новых пользователей."""
 
-    queryset = User.objects.all()
-    serializer_class = UserCreateSerializer
-    permission_classes = (AllowAny,)
+    serializer = UserCreateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
 
-    def create(self, request):
-        """Создает объект класса User и
-        отправляет на почту пользователя код подтверждения."""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user, created = User.objects.get_or_create(
-            **serializer.validated_data
-        )
-        confirmation_code = default_token_generator.make_token(user)
-        send_confirmation_code(
-            email=user.email,
-            code=confirmation_code
-        )
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class UserReceiveTokenViewSet(
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
-    """Вьюсет для получения токена."""
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_token(request):
+    """Функция для получения токена."""
 
-    queryset = User.objects.all()
-    serializer_class = UserRecieveTokenSerializer
-    permission_classes = (AllowAny,)
+    serializer = UserRecieveTokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-    def create(self, request):
-        """Предоставляет пользователю JWT токен по коду подтверждения."""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
-        confirmation_code = serializer.validated_data.get('confirmation_code')
+    username = serializer.validated_data.get('username')
+    confirmation_code = serializer.validated_data.get('confirmation_code')
+    user = get_object_or_404(User, username=username)
+    if not default_token_generator.check_token(user, confirmation_code):
+        message = {'confirmation_code': 'Некорректный код подтверждения'}
+        return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-        user = get_object_or_404(User, username=username)
-
-        if not default_token_generator.check_token(user, confirmation_code):
-            message = {'confirmation_code': 'Некорректный код подтверждения'}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
-        message = {'token': str(AccessToken.for_user(user))}
-        return Response(message, status=status.HTTP_200_OK)
+    message = {'token': str(AccessToken.for_user(user))}
+    return Response(message, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -157,58 +136,61 @@ class UserViewSet(viewsets.ModelViewSet):
     """
 
     queryset = User.objects.all()
-    serializer_class = AdminUserSerializer
+    serializer_class = UserSerializer
     permission_classes = (IsSuperUser,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
     @action(
-        methods=('get', 'patch', 'delete'),
         detail=False,
         url_path=r'(?P<username>[\w.@+-]+)',
     )
-    def get_user_by_username(self, request, username):
-        """
-        Извлечение данных пользователя по его username
-        админом и обновление/удаление информации.
-        """
+    def user_by_username(self, request, username):
+        """Извлечение данных пользователя админом."""
         user = get_object_or_404(User, username=username)
-        if request.method == 'PATCH':
-            serializer = self.get_serializer(
-                user, data=request.data, partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        elif request.method == 'DELETE':
-            user.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        serializer = AdminUserSerializer(user)
+        serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @user_by_username.mapping.patch
+    def update_user_by_username(self, request, username):
+        """Обновление пользователя админом."""
+        user = get_object_or_404(User, username=username)
+        serializer = self.get_serializer(
+            user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @user_by_username.mapping.delete
+    def delete_user_by_username(self, request, username):
+        """Удаление пользователя админом."""
+        user = get_object_or_404(User, username=username)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(
-        methods=('get', 'patch'),
         detail=False,
         url_path='me',
         permission_classes=(IsAuthenticated,)
     )
-    def get_myself(self, request):
-        """Позволяет пользователю получить подробную информацию о себе
-        и редактировать её."""
-        if request.method == 'PATCH':
-            serializer = SimpleUserSerializer(
-                request.user,
-                data=request.data,
-                partial=True,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    def myself(self, request):
+        """Позволяет пользователю получить информацию о себе."""
+        serializer = UserSerializer(request.user)  
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        serializer = AdminUserSerializer(request.user)
+    @myself.mapping.patch
+    def update_myself(self, request):
+        """Позволяет пользователю обновить информацию о себе."""
+        serializer = UserSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
