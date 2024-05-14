@@ -83,16 +83,15 @@ class UserCreateSerializer(serializers.Serializer):
         username_and_email_are_unique(username, email)
         return attrs
 
-    def create(self, validated_data):
-        username = validated_data.get('username')
-        email = validated_data.get('email')
+    def save(self, **kwargs):
+        username = self.validated_data.get('username')
+        email = self.validated_data.get('email')
         user, _ = User.objects.get_or_create(username=username, email=email)
         confirmation_code = default_token_generator.make_token(user)
         send_confirmation_code(
             email=user.email,
             code=confirmation_code
         )
-
         return user
 
 
