@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .mixins import ListCreateDestroyViewSet
+from .mixins import ListCreateDestroyViewSet, PatchModelMixin
 from .filters import TitleFilter
 from .permissions import (
     CustomObjectPermissions,
@@ -68,7 +68,11 @@ class GenreViewSet(ListCreateDestroyViewSet):
     lookup_field = 'slug'
 
 
-class TitleViewSet(viewsets.ModelViewSet):
+class TitleViewSet(
+    ListCreateDestroyViewSet,
+    mixins.RetrieveModelMixin,
+    PatchModelMixin
+):
     """Вьюсет получения, добавления и удаления произведений."""
 
     queryset = Title.objects.annotate(
@@ -86,30 +90,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(
             category=get_object_or_404(
-                Category, slug=self.request.data.get('category')
+                Category,
+                slug=self.request.data.get('category')
             ),
             genre=Genre.objects.filter(
                 slug__in=self.request.data.getlist('genre')
             ),
         )
-
-    def perform_update(self, serializer):
-        self.perform_create(serializer)
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-
-    def partial_update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(
-            self.get_object(),
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
 
 
 class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -225,7 +212,11 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(
+    ListCreateDestroyViewSet,
+    mixins.RetrieveModelMixin,
+    PatchModelMixin
+):
     """Вьюсет для получения/создания/обновления/удаления комментариев."""
 
     serializer_class = CommentSerializer
@@ -245,23 +236,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
         serializer.save(author=self.request.user, review=review)
 
-    def update(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
 
-    def partial_update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(
-            self.get_object(),
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-
-
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(
+    ListCreateDestroyViewSet,
+    mixins.RetrieveModelMixin,
+    PatchModelMixin
+):
     """Вьюсет для получения/создания/обновления/удаления ревью."""
 
     serializer_class = ReviewSerializer
@@ -284,17 +264,5 @@ class ReviewViewSet(viewsets.ModelViewSet):
             title=title
         )
 
-    def update(self, request, *args, **kwargs):
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-
-    def partial_update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(
-            self.get_object(),
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
+    def perform_update(self, serializer):
+        serializer.save()
