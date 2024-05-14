@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
 from reviews.models import Category, Genre, Title, Comment, Review
@@ -188,11 +188,13 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     author = serializers.SlugRelatedField(
         slug_field='username',
-        read_only=True
+        read_only=True,
+        # default=''
     )
     title = serializers.SlugRelatedField(
         slug_field='name',
-        read_only=True
+        read_only=True,
+        # default=''
     )
 
     def validate(self, data):
@@ -218,3 +220,10 @@ class ReviewSerializer(serializers.ModelSerializer):
             'score',
             'pub_date'
         )
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=model.objects.all(),
+        #         fields=['author', 'title'],
+        #         message='Вы уже оставили отзыв на это произведение'
+        #     )
+        # ]
