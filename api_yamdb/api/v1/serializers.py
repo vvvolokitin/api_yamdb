@@ -157,12 +157,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        # default=serializers.CurrentUserDefault()
+        default=serializers.CurrentUserDefault()
     )
     title = serializers.SlugRelatedField(
         slug_field='name',
         read_only=True,
-        # default=''
+        #default=''
     )
 
     class Meta:
@@ -175,23 +175,30 @@ class ReviewSerializer(serializers.ModelSerializer):
             'score',
             'pub_date'
         )
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=model.objects.all(),
-        #         fields=['author', 'title'],
-        #         message='Вы уже оставили отзыв на это произведение'
-        #     )
-        # ]
-
-    def validate(self, data):
-        """Проверка на наличие отзыва."""
-        request = self.context.get('request')
-        author = request.user
-        title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
-        if (request.method == 'POST' and Review.objects.filter(
-                title=title, author=author).exists()):
-            raise serializers.ValidationError(
-                'Вы уже оставили отзыв на это произведение'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=['author', 'title'],
+                message='Вы уже оставили отзыв на это произведение'
             )
-        return data
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        title_id = self.context.get('view').kwargs.get('title_id')
+        if title_id:
+            title = get_object_or_404(Title, id=title_id)
+            self.fields['title'].default = title
+
+    # def validate(self, data):
+    #     """Проверка на наличие отзыва."""
+    #     request = self.context.get('request')
+    #     author = request.user
+    #     title_id = self.context.get('view').kwargs.get('title_id')
+    #     title = get_object_or_404(Title, pk=title_id)
+    #     if (request.method == 'POST' and Review.objects.filter(
+    #             title=title, author=author).exists()):
+    #         raise serializers.ValidationError(
+    #             'Вы уже оставили отзыв на это произведение'
+    #         )
+    #     return data
