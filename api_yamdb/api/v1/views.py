@@ -177,7 +177,7 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def myself(self, request):
         """Позволяет пользователю получить информацию о себе."""
-        serializer = self.get_serializer(request.user)  
+        serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @myself.mapping.patch
