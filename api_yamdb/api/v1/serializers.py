@@ -115,7 +115,7 @@ class UserRecieveTokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериалайзер пользователя"""
+    """Сериалайзер пользователягтш."""
 
     class Meta():
         model = User
@@ -157,7 +157,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        # default=''
+        # default=serializers.CurrentUserDefault()
     )
     title = serializers.SlugRelatedField(
         slug_field='name',
