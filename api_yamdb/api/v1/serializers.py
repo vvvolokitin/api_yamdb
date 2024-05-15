@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
 from reviews.models import Category, Genre, Title, Comment, Review
@@ -157,12 +156,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        # default=serializers.CurrentUserDefault()
-    )
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True,
-        # default=''
     )
 
     class Meta:
@@ -170,18 +163,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'author',
-            'title',
             'text',
             'score',
             'pub_date'
         )
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=model.objects.all(),
-        #         fields=['author', 'title'],
-        #         message='Вы уже оставили отзыв на это произведение'
-        #     )
-        # ]
 
     def validate(self, data):
         """Проверка на наличие отзыва."""
