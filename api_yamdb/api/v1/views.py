@@ -86,6 +86,9 @@ class TitleViewSet(
     )
     filterset_class = TitleFilter
 
+    def perform_update(self, serializer):
+        self.perform_create(serializer)
+
     def perform_create(self, serializer):
         serializer.save(
             category=get_object_or_404(
@@ -239,6 +242,3 @@ class ReviewViewSet(
                 id=self.kwargs.get('title_id')
             )
         )
-
-    def perform_update(self, serializer):
-        serializer.save()
