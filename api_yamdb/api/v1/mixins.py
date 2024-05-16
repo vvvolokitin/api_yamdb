@@ -1,3 +1,4 @@
+from django.db.models import prefetch_related_objects
 from rest_framework import mixins, serializers, viewsets
 from rest_framework.response import Response
 
@@ -24,8 +25,10 @@ class PatchModelMixin:
         queryset = self.filter_queryset(self.get_queryset())
         if queryset._prefetch_related_lookups:
             instance._prefetched_objects_cache = {}
-            _prefetch_related_objects(
-                [instance], *queryset._prefetch_related_lookups)
+            prefetch_related_objects(
+                [instance],
+                *queryset._prefetch_related_lookups
+            )
         return Response(serializer.data)
 
     def perform_update(self, serializer):
