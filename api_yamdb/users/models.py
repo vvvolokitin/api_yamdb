@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
-from core.constants import MAX_ROLE_LENGTH, MAX_EMAIL_LENGTH
+from core.constants import MAX_EMAIL_LENGTH, MAX_ROLE_LENGTH
 
 
 class CustomUserModel(AbstractUser):
