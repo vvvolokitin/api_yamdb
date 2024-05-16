@@ -1,16 +1,24 @@
 from pathlib import Path
 from datetime import timedelta
+import os
+import sys
 
+from dotenv import load_dotenv
 from core.constants import PAGES_PER_PAGINATION
 
 
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+if SECRET_KEY is None:
+    sys.exit("Ошибка: SECRET_KEY не найден среди переменных окружения.")
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS')
 
 
 INSTALLED_APPS = [
@@ -94,7 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -110,7 +118,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 
-AUTH_USER_MODEL = 'users.MyUser'
+AUTH_USER_MODEL = 'users.CustomUserModel'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 

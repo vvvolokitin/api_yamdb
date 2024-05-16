@@ -1,15 +1,15 @@
 from django.conf import settings
 from django.urls import include, path
 
-from .views import (
+from .v1.views import (
     CategoryViewSet,
     GenreViewSet,
-    UserCreateViewSet,
-    UserReceiveTokenViewSet,
     UserViewSet,
     TitleViewSet,
     ReviewViewSet,
     CommentViewSet,
+    create_user,
+    get_token
 )
 
 
@@ -55,12 +55,12 @@ router_v1.register(
 auth_urls = [
     path(
         'signup/',
-        UserCreateViewSet.as_view({'post': 'create'}),
+        create_user,
         name='signup'
     ),
     path(
         'token/',
-        UserReceiveTokenViewSet.as_view({'post': 'create'}),
+        get_token,  # UserReceiveTokenViewSet.as_view({'post': 'create'}),
         name='token'
     )
 ]

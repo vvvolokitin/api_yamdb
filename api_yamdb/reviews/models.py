@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import slug_validator, year_validator
+from .validators import year_validator
 from core.constants import COMMENT_LENGHT, MAX_LENGTH_NAME, MAX_LENGTH_SLUG
 
 User = get_user_model()
@@ -23,10 +23,7 @@ class Category(models.Model):
         help_text=(
             'Идентификатор страницы для URL; '
             'разрешены символы латиницы, цифры, дефис и подчёркивание.'
-        ),
-        validators=[
-            slug_validator,
-        ]
+        )
     )
 
     class Meta:
@@ -50,10 +47,7 @@ class Genre(models.Model):
         help_text=(
             'Идентификатор страницы для URL; '
             'разрешены символы латиницы, цифры, дефис и подчёркивание.'
-        ),
-        validators=[
-            slug_validator,
-        ]
+        )
     )
 
     class Meta:
@@ -68,15 +62,15 @@ class Title(models.Model):
     name = models.CharField(
         max_length=MAX_LENGTH_NAME,
         verbose_name='Название',
-        help_text='Выберите название произведения'
+        help_text='Выберите название произведения',
+        blank=False,
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='Год',
         validators=[
             year_validator,
         ],
-        null=True,
-        blank=True,
+        blank=False,
         help_text=(
             'Год выпуска не может быть больше текущего.'
         ),
@@ -84,20 +78,19 @@ class Title(models.Model):
     description = models.TextField(
         verbose_name='Описание',
         blank=True,
-        null=True,
     )
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Жанр',
         related_name='titles',
-        blank=True,
+        blank=False,
     )
     category = models.ForeignKey(
         Category,
         verbose_name='Категория',
         on_delete=models.SET_NULL,
+        blank=False,
         null=True,
-        blank=True,
         related_name='titles',
     )
 
@@ -125,8 +118,14 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10),
+            MinValueValidator(
+                1,
+                message='Оценка должна быть не ниже 1'
+            ),
+            MaxValueValidator(
+                10,
+                message='Оценка должна быть не выше 10'
+            ),
         ],
         verbose_name='Рейтинг',
         null=True
