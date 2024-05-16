@@ -1,13 +1,7 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-
+from rest_framework import serializers
 
 User = get_user_model()
-
-
-def name_is_not_me(username):
-    if username and username.lower() == 'me':
-        raise serializers.ValidationError('Имя не может быть <me>')
 
 
 def username_and_email_are_unique(username, email):

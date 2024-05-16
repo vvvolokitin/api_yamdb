@@ -1,6 +1,6 @@
-from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -10,25 +10,24 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .mixins import ListCreateDestroyViewSet, PatchModelMixin
 from .filters import TitleFilter
+from .mixins import ListCreateDestroyViewSet, PatchModelMixin
 from .permissions import (
-    ReadOrAuthenticatedOrInAuthorModerAdmin,
     IsSuperUser,
-    IsSuperUserOrReadOnly
+    IsSuperUserOrReadOnly,
+    ReadOrAuthenticatedOrInAuthorModerAdmin
 )
 from .serializers import (
     CategorySerializer,
+    CommentSerializer,
     GenreSerializer,
-    UserSerializer,
+    ReviewSerializer,
     TitleSerializer,
     UserCreateSerializer,
     UserRecieveTokenSerializer,
-    CommentSerializer,
-    ReviewSerializer,
+    UserSerializer
 )
-
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Review, Title
 
 User = get_user_model()
 
@@ -86,6 +85,9 @@ class TitleViewSet(
     )
     filterset_class = TitleFilter
 
+    def perform_update(self, serializer):
+        self.perform_create(serializer)
+
     def perform_create(self, serializer):
         serializer.save(
             category=get_object_or_404(
@@ -102,7 +104,6 @@ class TitleViewSet(
 @permission_classes([AllowAny])
 def create_user(request):
     """Функция для создания новых пользователей."""
-
     serializer = UserCreateSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     serializer.save()
@@ -114,7 +115,6 @@ def create_user(request):
 @permission_classes([AllowAny])
 def get_token(request):
     """Функция для получения токена."""
-
     serializer = UserRecieveTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
@@ -202,18 +202,19 @@ class CommentViewSet(
     permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)
 
     def get_queryset(self):
-        review = get_object_or_404(
+        return get_object_or_404(
             Review,
             id=self.kwargs.get('review_id')
-        )
-        return review.comments.all()
+        ).comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            id=self.kwargs.get('review_id')
+        serializer.save(
+            author=self.request.user,
+            review=get_object_or_404(
+                Review,
+                id=self.kwargs.get('review_id')
+            )
         )
-        serializer.save(author=self.request.user, review=review)
 
 
 class ReviewViewSet(
@@ -227,21 +228,16 @@ class ReviewViewSet(
     permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)
 
     def get_queryset(self):
-        title = get_object_or_404(
+        return get_object_or_404(
             Title,
             id=self.kwargs.get('title_id')
-        )
-        return title.reviews.all()
+        ).reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(
-            Title,
-            id=self.kwargs.get('title_id')
-        )
         serializer.save(
             author=self.request.user,
-            title=title
+            title=get_object_or_404(
+                Title,
+                id=self.kwargs.get('title_id')
+            )
         )
-
-    def perform_update(self, serializer):
-        serializer.save()
