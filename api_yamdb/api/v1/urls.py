@@ -60,7 +60,7 @@ auth_urls = [
     ),
     path(
         'token/',
-        get_token,  # UserReceiveTokenViewSet.as_view({'post': 'create'}),
+        get_token,
         name='token'
     )
 ]

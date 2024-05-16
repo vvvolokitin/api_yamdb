@@ -35,7 +35,7 @@ class CustomUserModel(AbstractUser):
     def clean(self):
         super().clean()
         if self.username and self.username.lower() == 'me':
-            raise ValidationError('Имя не может быть "me"')
+            raise ValidationError('Имя не может быть <me>')
 
     @property
     def is_admin(self):
