@@ -5,8 +5,10 @@ from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title
 
 from .utils import send_confirmation_code
-from .validators import name_is_not_me, username_and_email_are_unique
+from .validators import username_and_email_are_unique
+from .mixins import ValidateUsernameMixin
 from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
+
 
 User = get_user_model()
 
@@ -53,28 +55,16 @@ class TitleSerializer(serializers.ModelSerializer):
         )
 
 
-class UserCreateSerializer(serializers.Serializer):
+class UserCreateSerializer(ValidateUsernameMixin, serializers.Serializer):
     """Сериалайзер для создания новых пользователей."""
 
     username = serializers.RegexField(
         regex=r'^[\w.@+-]+$',
-        max_length=MAX_USER_NAME_LENGTH,
-        required=True,
+        max_length=MAX_USER_NAME_LENGTH
     )
     email = serializers.EmailField(
-        max_length=MAX_EMAIL_LENGTH,
-        required=True,
+        max_length=MAX_EMAIL_LENGTH
     )
-
-    class Meta:
-        fields = (
-            'username',
-            'email'
-        )
-
-    def validate_username(self, value):
-        name_is_not_me(value)
-        return value
 
     def validate(self, attrs):
         username = attrs.get('username')
@@ -102,21 +92,12 @@ class UserRecieveTokenSerializer(serializers.Serializer):
 
     username = serializers.RegexField(
         regex=r'^[\w.@+-]+$',
-        max_length=MAX_USER_NAME_LENGTH,
-        required=True
+        max_length=MAX_USER_NAME_LENGTH
     )
-    confirmation_code = serializers.CharField(
-        required=True
-    )
-
-    class Meta:
-        fields = (
-            'username',
-            'confirmation_code'
-        )
+    confirmation_code = serializers.CharField()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(ValidateUsernameMixin, serializers.ModelSerializer):
     """Сериалайзер пользователя."""
 
     class Meta():
@@ -129,10 +110,6 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
-
-    def validate_username(self, value):
-        name_is_not_me(value)
-        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -176,9 +153,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         author = request.user
         title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
-        if (request.method == 'POST' and Review.objects.filter(
-                title=title, author=author).exists()):
+        if request.method != 'POST':
+            return data
+        if Review.objects.filter(title=title_id, author=author).exists():
             raise serializers.ValidationError(
                 'Вы уже оставили отзыв на это произведение'
             )

@@ -1,4 +1,4 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, serializers
 from rest_framework.response import Response
 
 
@@ -24,3 +24,10 @@ class PatchModelMixin:
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+
+class ValidateUsernameMixin:
+    def validate_username(self, username):
+        if username and username.lower() == 'me':
+            raise serializers.ValidationError('Имя не может быть <me>')
+        return username
