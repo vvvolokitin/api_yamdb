@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 if SECRET_KEY is None:
     sys.exit("Ошибка: SECRET_KEY не найден среди переменных окружения.")
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS')
 

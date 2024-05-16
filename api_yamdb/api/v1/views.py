@@ -130,10 +130,7 @@ def get_token(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    Вьюсет для получения/создания/обновления/удаления новых пользователей
-    админом либо самим пользователем.
-    """
+    """Вьюсет получения/создания/обновления/удаления пользователей."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -199,7 +196,7 @@ class CommentViewSet(
     mixins.RetrieveModelMixin,
     PatchModelMixin
 ):
-    """Вьюсет для получения/создания/обновления/удаления комментариев."""
+    """Вьюсет получения/создания/обновления/удаления комментариев."""
 
     serializer_class = CommentSerializer
     permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)
@@ -224,7 +221,7 @@ class ReviewViewSet(
     mixins.RetrieveModelMixin,
     PatchModelMixin
 ):
-    """Вьюсет для получения/создания/обновления/удаления ревью."""
+    """Вьюсет получения/создания/обновления/удаления ревью."""
 
     serializer_class = ReviewSerializer
     permission_classes = (ReadOrAuthenticatedOrInAuthorModerAdmin,)

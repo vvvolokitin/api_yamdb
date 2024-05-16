@@ -2,11 +2,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from reviews.models import Category, Comment, Genre, Review, Title
 
-from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
-from reviews.models import Category, Genre, Title, Comment, Review
-from .validators import name_is_not_me, username_and_email_are_unique
 from .utils import send_confirmation_code
+from .validators import name_is_not_me, username_and_email_are_unique
+from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
 
 User = get_user_model()
 
@@ -85,7 +85,10 @@ class UserCreateSerializer(serializers.Serializer):
     def save(self, **kwargs):
         username = self.validated_data.get('username')
         email = self.validated_data.get('email')
-        user, _ = User.objects.get_or_create(username=username, email=email)
+        user, _ = User.objects.get_or_create(
+            username=username,
+            email=email
+        )
         confirmation_code = default_token_generator.make_token(user)
         send_confirmation_code(
             email=user.email,
@@ -114,7 +117,7 @@ class UserRecieveTokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериалайзер пользователягтш."""
+    """Сериалайзер пользователя."""
 
     class Meta():
         model = User
