@@ -2,13 +2,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import Category, Comment, Genre, Review, Title
 
+from .mixins import ValidateUsernameMixin
 from .utils import send_confirmation_code
 from .validators import username_and_email_are_unique
-from .mixins import ValidateUsernameMixin
 from core.constants import MAX_EMAIL_LENGTH, MAX_USER_NAME_LENGTH
-
+from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 

@@ -3,15 +3,14 @@ from django.urls import include, path
 
 from .views import (
     CategoryViewSet,
-    GenreViewSet,
-    UserViewSet,
-    TitleViewSet,
-    ReviewViewSet,
     CommentViewSet,
+    GenreViewSet,
+    ReviewViewSet,
+    TitleViewSet,
+    UserViewSet,
     create_user,
     get_token
 )
-
 
 if settings.DEBUG:
     from rest_framework.routers import DefaultRouter as Router

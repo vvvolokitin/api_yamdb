@@ -1,6 +1,6 @@
-from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -10,25 +10,24 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .mixins import ListCreateDestroyViewSet, PatchModelMixin
 from .filters import TitleFilter
+from .mixins import ListCreateDestroyViewSet, PatchModelMixin
 from .permissions import (
-    ReadOrAuthenticatedOrInAuthorModerAdmin,
     IsSuperUser,
-    IsSuperUserOrReadOnly
+    IsSuperUserOrReadOnly,
+    ReadOrAuthenticatedOrInAuthorModerAdmin
 )
 from .serializers import (
     CategorySerializer,
+    CommentSerializer,
     GenreSerializer,
-    UserSerializer,
+    ReviewSerializer,
     TitleSerializer,
     UserCreateSerializer,
     UserRecieveTokenSerializer,
-    CommentSerializer,
-    ReviewSerializer,
+    UserSerializer
 )
-
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Review, Title
 
 User = get_user_model()
 
