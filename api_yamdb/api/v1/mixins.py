@@ -24,7 +24,7 @@ class PatchModelMixin:
         queryset = self.filter_queryset(self.get_queryset())
         if queryset._prefetch_related_lookups:
             instance._prefetched_objects_cache = {}
-            prefetch_related_objects(
+            _prefetch_related_objects(
                 [instance], *queryset._prefetch_related_lookups)
         return Response(serializer.data)
 
