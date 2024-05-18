@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from .mixins import ValidateUsernameMixin
@@ -149,12 +150,22 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Проверка на наличие отзыва."""
         request = self.context.get('request')
-        author = request.user
-        title_id = self.context.get('view').kwargs.get('title_id')
         if request.method != 'POST':
             return data
-        if Review.objects.filter(title=title_id, author=author).exists():
+
+        author = request.user
+        title_id = self.context.get('view').kwargs.get('title_id')
+
+        if author.reviews.filter(title=title_id).exists():
             raise serializers.ValidationError(
                 'Вы уже оставили отзыв на это произведение'
             )
         return data
+
+
+# title = Title.objects.prefetch_related('reviews').filter(id=title_id).first()
+
+        # if title and title.reviews.filter(author=author).exists():
+        #     raise serializers.ValidationError(
+        #         'Вы уже оставили отзыв на это произведение'
+        #     )
